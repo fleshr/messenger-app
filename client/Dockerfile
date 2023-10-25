@@ -1,0 +1,9 @@
+FROM node:18-alpine
+ARG NEXT_PUBLIC_SERVER_URL
+ENV NEXT_PUBLIC_SERVER_URL $NEXT_PUBLIC_SERVER_URL
+WORKDIR /client
+COPY . .
+RUN npm ci
+RUN npm run build
+CMD ["npm", "start"]
+EXPOSE 4000

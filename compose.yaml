@@ -1,0 +1,40 @@
+services:
+
+  messenger-client:
+    container_name: messenger-client
+    build:
+      context: ./client
+      args:
+        NEXT_PUBLIC_SERVER_URL: ${DOMAIN}:4000
+    depends_on:
+      - mongo
+    environment:
+      MONGODB_URL: mongodb://mongo:27017/messenger-app
+      GOOGLE_CLIENT_ID: $GOOGLE_CLIENT_ID
+      GOOGLE_CLIENT_SECRET: $GOOGLE_CLIENT_SECRET
+      NEXTAUTH_URL: http://${DOMAIN}:3000
+      NEXTAUTH_SECRET: $NEXTAUTH_SECRET
+      SERVER_URL: ${DOMAIN}:4000
+    ports:
+      - "3000:3000"
+
+  messenger-server:
+    container_name: messenger-server
+    build: ./server
+    depends_on:
+      - mongo
+    environment:
+      MONGODB_URL: mongodb://mongo:27017/messenger-app
+      NEXTAUTH_URL: http://messenger-client:3000
+      FRONTEND_URL: http://${DOMAIN}:3000
+      PORT: 4000
+    ports:
+      - "4000:4000"
+
+  # sudo docker exec -it mongo mongosh --eval "rs.initiate({_id: \"rs0\",members:[{_id: 0, host: \"mongo\"}]})"
+  mongo:
+    container_name: mongo
+    image: mongo:latest
+    command: --replSet rs0
+
+
